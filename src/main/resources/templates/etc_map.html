@@ -1,0 +1,200 @@
+﻿<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:th="http://www.thymeleaf.org"
+	xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity3"
+	xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
+<head>
+<title>Simple Map</title>
+<meta name="viewport" content="initial-scale=1.0" />
+<meta charset="utf-8" />
+<style>
+/* Always set the map height explicitly to define the size of the div
+       * element that contains the map. */
+#map {
+	height: 100%;
+}
+/* Optional: Makes the sample page fill the window. */
+html, body {
+	height: 100%;
+	margin: 0;
+	padding: 0;
+}
+</style> 
+
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.2.13/semantic.min.css"></link>
+	<script src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
+</head>
+<body>
+
+	<h1 class="ui header">Etc Data Demo</h1>
+	<div style="width:800px" class="ui fluid action input">
+			<input type="text" placeholder="Search..."></input>
+			<button id="qryBtn" class="ui primary button" onclick="getAllData()">查詢</button>		
+	</div>		
+		
+	<div id="map" style="width:800px;height:600px" class="ui segment"></div>
+
+	<!--Simulate Data-->
+	<script>
+		//var data = "{\"region\": \"N\",\"srcdetail\": \"熱心聽眾\",\"areaNm\": \"中山高速公路-國道１號\",\"UID\": \"10609060220-0\",\"direction\": \"南下\",\"y1\": \"25.04577\",\"happentime\": \"19:21:00.0000000\",\"roadtype\": \"事故\",\"road\": \"\",\"modDttm\": \"2017-09-06 19:34:51.973\",\"comment\": \"南下在47公里*1937國一排除**1926北控.大客車+大貨車追撞佔用中線車道*.桃園前.中線車道 2部車 事故\",\"happendate\": \"2017-09-06\",\"x1\": \"121.31485\"}"
+		//var jdata = JSON.parse(data);
+		//var data2 = "{\"region\": \"N\",\"srcdetail\": \"熱心聽眾\",\"areaNm\": \"中山高速公路-國道１號\",\"UID\": \"10609070250-0\",\"direction\": \"雙向\",\"y1\": \"25.12263\",\"happentime\": \"19:54:00.0000000\",\"roadtype\": \"其他\",\"road\": \"\",\"modDttm\": \"2017-09-07 19:52:40.433\",\"comment\": \"雙向新竹~頭份.下大雨\",\"happendate\": \"2017-09-07\",\"x1\": \"121.73558\"}"
+		//var jdata2 = JSON.parse(data2);
+					
+		//var dataArray="[" + [data].join(",") + "]";
+		//console.log(dataArray)
+		//var jdataArray = JSON.parse(dataArray);
+		//initMap();
+		
+		showAllData();
+		
+		function showAllData(){
+		    $.ajax({
+		      type: "POST",
+		      url: "get_ad",
+		      //data: {title:title} ,
+		      success: function(data) {
+					jdataArray = data;
+					initMap();
+		      }
+		    });
+		}
+		
+	</script>
+	
+	<!--for Google Map API-->
+	<script type="text/javascript" th:inline="javascript">
+		/*<![CDATA[*/
+		var map;
+		var image = '/resources/images/car_fix_32.png';
+		var jdataArray;//存放要顯示的Marker
+	
+		function initMarker(jdata, image, coordInfoWindow) {
+			// 地圖標記
+			var simulate_loc = new google.maps.LatLng(jdata.y1, jdata.x1);
+			//console.log('simulate_loc: ' + simulate_loc)
+			var marker = new google.maps.Marker({
+				position: simulate_loc,
+				map: map,
+				icon: image
+			});
+	
+			marker.addListener('click', function(event) {
+				// 取得點在地圖上的event之經緯資訊
+				var pos = event.latLng;
+	
+				// console.log('pos : ' + pos );
+	
+				coordInfoWindow.setContent(createInfoWindowContent(pos, jdata, map.getZoom()));
+				coordInfoWindow.setPosition(pos);
+				coordInfoWindow.open(map);
+			});
+		}
+	
+	
+		function initMap() {
+			// 地圖初始位置
+			var loc = new google.maps.LatLng(25.04, 121.31);
+	
+			map = new google.maps.Map(document.getElementById('map'), {
+				center: loc,
+				zoom: 15 // 預設值暫定15，最大值是到22
+			});
+	
+			var coordInfoWindow = new google.maps.InfoWindow();
+			// call createInfoWindowContent()
+			// coordInfoWindow.setContent(createInfoWindowContent(loc,
+			// map.getZoom()));
+			// coordInfoWindow.setPosition(loc);
+			// coordInfoWindow.open(map);
+	
+	
+			//console.log('jdataArray.length: ' + jdataArray.length)
+			// 初始化Marker
+			if(jdataArray!=null){
+				for (i = 0; i < jdataArray.length; i++) {
+					//console.log('jdataArray [' + i +"] :" + jdataArray[i])
+					initMarker(jdataArray[i], image, coordInfoWindow);
+				}
+			}
+	
+			map.addListener('zoom_changed', function() {
+				var infoContent = coordInfoWindow.getContent();
+	
+				if(infoContent==null){
+					return;
+				}
+	
+				coordInfoWindow.setContent(createInfoWindowContent(loc, infoContent, map.getZoom()));
+				coordInfoWindow.open(map);
+			});
+	
+	
+	
+			map.addListener('click', function(event) {
+				// 取得點在地圖上的event之經緯資訊
+				var pos = event.latLng;
+				console.log('pos : ' + pos );
+	
+				// 清除點
+				coordInfoWindow.close();
+			});
+		}
+	
+		var TILE_SIZE = 256;
+	
+		function createInfoWindowContent(latLng, jdata, zoom) {
+			var scale = 1 << zoom;
+	
+			var worldCoordinate = project(latLng);
+	
+			var pixelCoordinate = new google.maps.Point(
+					Math.floor(worldCoordinate.x * scale),
+					Math.floor(worldCoordinate.y * scale));
+	
+			var tileCoordinate = new google.maps.Point(
+					Math.floor(worldCoordinate.x * scale / TILE_SIZE),
+					Math.floor(worldCoordinate.y * scale / TILE_SIZE));
+	
+			// 顯示在框框內的值
+	
+			if (typeof jdata === 'string') {
+				return jdata;
+			}
+	
+			var returnValue = [
+				'資料來源: ' + jdata.srcdetail,
+				'' + jdata.areaNm,
+				'方向: ' + jdata.direction,
+				'事件時間: ' + jdata.happentime,
+				'y1: ' + jdata.y1,
+				'x1: ' + jdata.x1,
+				].join('<br>');
+			// for debug
+			// console.log(returnValue)
+			// console.log('zoom : ' + zoom );
+			return returnValue;
+		}
+	
+		// The mapping between latitude, longitude and pixels is defined by the
+		// web
+		// mercator projection.
+		function project(latLng) {
+			var siny = Math.sin(latLng.lat() * Math.PI / 180);
+	
+			// Truncating to 0.9999 effectively limits latitude to 89.189. This is
+			// about a third of a tile past the edge of the world tile.
+			siny = Math.min(Math.max(siny, -0.9999), 0.9999);
+	
+			return new google.maps.Point(
+					TILE_SIZE * (0.0 + latLng.lng() / 360),
+					TILE_SIZE * (0.5 - Math.log((1 + siny) / (1 - siny)) / (4 * Math.PI)));
+		}
+		/*]]>*/
+	</script>
+	<script type="text/javascript"
+		src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCnu6k3TZ6tS6Jt_NjLZalUcbuBZJyTeY4&amp;callback=initMap"
+		async="async" defer="defer"></script>
+</body>
+
+</html>
