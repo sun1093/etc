@@ -86,7 +86,7 @@ html, body {
 		var directionsDisplay;
 		var directionsService;
 		
-		function initMarker(lat, lng, image, coordInfoWindow) {
+		function initMarker(lat, lng, image, coordInfoWindow, jdata) {
 			// 地圖標記
 			var simulate_loc = new google.maps.LatLng(lat, lng);
 			//console.log('simulate_loc: ' + simulate_loc)
@@ -240,7 +240,7 @@ html, body {
 			if(jdataArray!=null){
 				for (i = 0; i < jdataArray.length; i++) {
 					//console.log('jdataArray [' + i +"] :" + jdataArray[i])
-					initMarker(jdataArray[i].y1, jdataArray[i].x1, image, coordInfoWindow);
+					initMarker(jdataArray[i].y1, jdataArray[i].x1, image, coordInfoWindow, jdataArray[i]);
 				}
 			}
 	
