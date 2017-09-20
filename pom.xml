@@ -27,7 +27,7 @@
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-thymeleaf</artifactId>
-		</dependency> 
+		</dependency>
 
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
@@ -52,6 +52,50 @@
 			<artifactId>spring-webmvc</artifactId>
 		</dependency>
 
+		<!-- jpa -->
+		<dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-jdbc</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>org.hibernate</groupId>
+			<artifactId>hibernate-core</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-orm</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>org.hibernate</groupId>
+			<artifactId>hibernate-entitymanager</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>org.apache.commons</groupId>
+			<artifactId>commons-dbcp2</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>com.tradevan.commons.util</groupId>
+			<artifactId>tvutilities</artifactId>
+			<version>1.0.0</version>
+		</dependency>
+
+		<dependency>
+			<groupId>com.tradevan.commons</groupId>
+			<artifactId>tv-commons</artifactId>
+			<version>1.0.9</version>
+		</dependency>
+
+		<dependency>
+			<groupId>com.tradevan.util</groupId>
+			<artifactId>B64Hash</artifactId>
+			<version>1.0.1</version>
+		</dependency>
+
 		<!-- for test -->
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
@@ -62,6 +106,11 @@
 		<dependency>
 			<groupId>javax.servlet</groupId>
 			<artifactId>javax.servlet-api</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>com.h2database</groupId>
+			<artifactId>h2</artifactId>
 		</dependency>
 
 		<!-- for bootstrap -->
@@ -92,7 +141,7 @@
 			<version>1.2.16</version>
 			<scope>runtime</scope>
 		</dependency>
-		
+
 		<!--jackson -->
 		<dependency>
 			<groupId>com.fasterxml.jackson.core</groupId>
@@ -102,7 +151,7 @@
 			<groupId>com.fasterxml.jackson.core</groupId>
 			<artifactId>jackson-annotations</artifactId>
 		</dependency>
-		<dependency> 
+		<dependency>
 			<groupId>com.fasterxml.jackson.core</groupId>
 			<artifactId>jackson-databind</artifactId>
 		</dependency>

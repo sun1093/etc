@@ -19,35 +19,20 @@ html, body {
 	margin: 0;
 	padding: 0;
 }
-</style>
+</style> 
 
-<link rel="stylesheet"
-	href="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.2.13/semantic.min.css"></link>
-<script src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.2.13/semantic.min.css"></link>
+	<script src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
 </head>
 <body>
 
 	<h1 class="ui header">Etc Data Demo</h1>
-	<div style="width: 800px" class="ui fluid action input">
-		<input type="text" id="searchTxtStart" placeholder="搜尋啟始位置"
-			value=""></input>
-
-		<button id="qryStartBtn" class="ui primary button"
-			onclick="getLatLngByAddressStart()">查詢</button>
-	</div>
-	<div>&nbsp;</div>
-	<div style="width: 800px" class="ui fluid action input">
-		<input type="text" id="searchTxtEnd" placeholder="搜尋結束位置..." value=""></input>
-	<button id="qryEndBtn" class="ui second button"
-		onclick="getLatLngByAddressEnd()">查詢</button>
-	</div>
-	<div>&nbsp;</div>
-	<div style="width: 800px" class="ui fluid action input" >
-	<button id="qryRoute" class="ui second button"
-		onclick="qryRoute()" >查詢路線</button>
-	</div>
-
-	<div id="map" style="width: 800px; height: 600px" class="ui segment"></div>
+	<div style="width:800px" class="ui fluid action input">
+			<input type="text" placeholder="Search..."></input>
+			<button id="qryBtn" class="ui primary button" onclick="showAllData()">查詢</button>		
+	</div>		
+		
+	<div id="map" style="width:800px;height:600px" class="ui segment"></div>
 
 	<!--Simulate Data-->
 	<script>
@@ -76,21 +61,18 @@ html, body {
 		}
 		
 	</script>
-
+	
 	<!--for Google Map API-->
 	<script type="text/javascript" th:inline="javascript">
 		/*<![CDATA[*/
 		var map;
 		var image = '/resources/images/car_fix_32.png';
 		var jdataArray;//存放要顯示的Marker
-		var directionsDisplay;
-		var directionsService;
-		
-		function initMarker(lat, lng, image, coordInfoWindow, jdata) {
+	
+		function initMarker(jdata, image, coordInfoWindow) {
 			// 地圖標記
-			var simulate_loc = new google.maps.LatLng(lat, lng);
+			var simulate_loc = new google.maps.LatLng(jdata.y1, jdata.x1);
 			//console.log('simulate_loc: ' + simulate_loc)
-			
 			var marker = new google.maps.Marker({
 				position: simulate_loc,
 				map: map,
@@ -103,115 +85,12 @@ html, body {
 	
 				// console.log('pos : ' + pos );
 	
-				if(coordInfoWindow!=null){
-					coordInfoWindow.setContent(createInfoWindowContent(pos, jdata, map.getZoom()));
-					coordInfoWindow.setPosition(pos);
-					coordInfoWindow.open(map);
-				}
+				coordInfoWindow.setContent(createInfoWindowContent(pos, jdata, map.getZoom()));
+				coordInfoWindow.setPosition(pos);
+				coordInfoWindow.open(map);
 			});
-			
-			return marker;
 		}
-		
-		var qryMarkStart, qryMarkEnd;
-		
-		function getLatLngByAddressStart(setcenter, callback){
-			var addr = $("#searchTxtStart").val();
-			
-			if(addr.trim()==""){
-				alert("請輸入啟始位置");
-				return false;
-			}
-			
-			console.log(qryMarkStart==null)
-			cleanMark(qryMarkStart);
-			
-			getLatLngByAddress(addr, true, setcenter);
-			
-			if(callback!=null){
-				callback();
-			}
-			
-			return true;
-		}
-		
-		function getLatLngByAddressEnd(setcenter, callback){
-			var addr = $("#searchTxtEnd").val();
-			
-			if(addr.trim()==""){
-				alert("請輸入結束位置");
-				return false;
-			}
-			
-			cleanMark(qryMarkEnd);
-			
-			getLatLngByAddress(addr, false, setcenter)
-			
-			if(callback!=null){
-				callback();
-			}
-			return true;
-		}
-		
-		
-		function cleanMark(marker){
-			if(marker!=null){
-				marker.setMap(null);
-			}
-		}
-		
-		function qryRoute(){
-			var s_addr = $("#searchTxtStart").val();
-			var e_addr = $("#searchTxtEnd").val();
-			
-			if(getLatLngByAddressStart(false, null)){
-				getLatLngByAddressEnd(false, function(){
-					calcRoute(s_addr, e_addr);	
-				})
-			}
-		}
-		
-		function calcRoute(start, end) {
-		  var request = {
-		    origin: start,
-		    destination: end,
-		    travelMode: 'DRIVING'
-		  };
-		  
-		  directionsService.route(request, function(result, status) {
-		    if (status == 'OK') {
-		      directionsDisplay.setDirections(result);
-		    }
-		  });
-		}
-		
-		function getLatLngByAddress(search, start, setcenter){
-			 $.ajax({
-			      type: "POST",
-			      url: "https://maps.googleapis.com/maps/api/geocode/json?address=" +search + "&amp;key=AIzaSyCnu6k3TZ6tS6Jt_NjLZalUcbuBZJyTeY4",
-			      //data: {title:title} ,
-			      success: function(data) {
-			    	  if(data.results.length>0){//取最近的
-			    		  var result = data.results[0];
-			    		  var qryLatLng = result.geometry.location;
-			    		  
-			    		  var marker = initMarker(qryLatLng.lat, qryLatLng.lng, null, null);
-			    		  
-			    		  if(setcenter==null || setcenter){
-				    		 map.setCenter(qryLatLng);
-			    		  }
-			    		  
-			    		  if(start){
-			    			  qryMarkStart = marker;
-			    		  }else{
-			    			  qryMarkEnd = marker;
-			    		  }
-			    		  
-			    	  }
-			      }
-			    });		 
-		}
-		
+	
 	
 		function initMap() {
 			// 地圖初始位置
@@ -221,11 +100,6 @@ html, body {
 				center: loc,
 				zoom: 15 // 預設值暫定15，最大值是到22
 			});
-			
-			//路線規劃
-			directionsService = new google.maps.DirectionsService();
-			directionsDisplay = new google.maps.DirectionsRenderer();
-			directionsDisplay.setMap(map);
 	
 			var coordInfoWindow = new google.maps.InfoWindow();
 			// call createInfoWindowContent()
@@ -240,7 +114,7 @@ html, body {
 			if(jdataArray!=null){
 				for (i = 0; i < jdataArray.length; i++) {
 					//console.log('jdataArray [' + i +"] :" + jdataArray[i])
-					initMarker(jdataArray[i].y1, jdataArray[i].x1, image, coordInfoWindow, jdataArray[i]);
+					initMarker(jdataArray[i], image, coordInfoWindow);
 				}
 			}
 	
@@ -293,8 +167,8 @@ html, body {
 				'' + jdata.areaNm,
 				'方向: ' + jdata.direction,
 				'事件時間: ' + jdata.happentime,
-				'事故說明: ' + jdata.comment,
-				'(' + jdata.y1 +', ' + jdata.x1 + ')',
+				'y1: ' + jdata.y1,
+				'x1: ' + jdata.x1,
 				].join('<br>');
 			// for debug
 			// console.log(returnValue)
